@@ -15,6 +15,11 @@ To get started, type the following:
 var when = require('when-conditional');
 var someVar = false;
 
+var interval = setInterval(function(){
+  console.log("someVar is " + someVar);
+  if(someVar === true) clearInterval(interval);
+}, 1000);
+
 when(function condition(){
 	return (someVar === true);
 }, function code(){
@@ -23,7 +28,7 @@ when(function condition(){
 
 setTimeout(function(){
 	someVar = true;
-}, 10000)
+}, 10000);
 
 ```
 
