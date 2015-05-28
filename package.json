@@ -1,0 +1,25 @@
+{
+  "name": "when-conditional",
+  "version": "1.0.0",
+  "description": "A simple little asyncronous if check and conditional method",
+  "main": "when.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thekemkid/when-conditional.git"
+  },
+  "keywords": [
+    "if",
+    "when",
+    "async",
+    "asyncronous",
+    "utility",
+    "condition",
+    "conditional"
+  ],
+  "author": "Glen Keane",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thekemkid/when-conditional/issues"
+  },
+  "homepage": "https://github.com/thekemkid/when-conditional"
+}
