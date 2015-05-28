@@ -2,7 +2,7 @@ function when(condition, code){
 	if(condition()){
 	  return code();
 	} else {
-	  process.nextTick(function(){
+	  setImmediate(function(){
 	  	when(condition, code);
 	  });
 	}
