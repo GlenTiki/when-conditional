@@ -1,6 +1,6 @@
 {
   "name": "when-conditional",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple little asyncronous if check and conditional method",
   "main": "when.js",
   "repository": {
