@@ -10,7 +10,7 @@ To get started, type the following:
 ## Example
 ------------------------
 
-````javascript
+```javascript
 
 var when = require('when-conditional');
 var someVar = false;
