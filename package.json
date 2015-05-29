@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/thekemkid/when-conditional/issues"
   },
-  "homepage": "https://github.com/thekemkid/when-conditional"
+  "homepage": "https://github.com/thekemkid/when-conditional",
+  "dependencies": {
+    "setimmediate": "^1.0.2"
+  }
 }
