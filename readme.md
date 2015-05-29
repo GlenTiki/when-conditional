@@ -1,17 +1,30 @@
 # When-conditional
 -----------------------
 
-A utility library for asyncronous conditional checking, and then code running.
+A utility library for asyncronous conditional checking, and then running a callback when the condition is true.
 
 To get started, type the following:
 
 `npm install when-conditional`
 
-## Example
+## Syntax
 ------------------------
 
-```javascript
+```when(logicStatement, callback)```
 
+#### Parameters
+
+###### logicStatement
+A function which should `return` a `truthy` statement. The return is equivalent to what you would put in an `if` statement.
+
+###### callback
+A function which is called when the logicStatement function returns a truthy value.
+
+## Example
+------------------------
+The example code shown below will print out someVar is false a number of times until it becomes true, then will tell you its true and exit.
+
+```javascript
 var when = require('when-conditional');
 var someVar = false;
 
@@ -52,6 +65,8 @@ setTimeout(function(){
 ```
 
 To get my little shim working, I check the condition every tick. this is not ideal. ideally, I want to Object.observe the conditions, and only fire the `when` check once when the conditions have been observed to change
+
+The when-method module is expected to be more efficient than an interval.
 
 ## See you when-ever!
 Copyright Glen Keane - 2015 - MIT Licence
