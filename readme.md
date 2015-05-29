@@ -10,7 +10,9 @@ To get started, type the following:
 ## Syntax
 ------------------------
 
-```when(logicStatement, callback)```
+```
+when(logicStatement, callback)
+```
 
 #### Parameters
 
