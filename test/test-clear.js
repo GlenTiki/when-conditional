@@ -16,3 +16,6 @@ setTimeout(function(){
 	someVar = true;
 }, 10000);
 
+setTimeout(function(){
+  immediate.clear();
+}, 5000);

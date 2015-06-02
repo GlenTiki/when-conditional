@@ -3,13 +3,22 @@
 require('setimmediate');
 
 function when(condition, code){
-	if(condition()){
-	  return setImmediate(code);
-	} else {
-	  return setImmediate(function(){
-	  	return when(condition, code);
-	  });
-	}
+  var immediate = setImmediate(checkCondition);
+
+  function checkCondition(){
+    if(condition()){
+      immediate = setImmediate(code);
+    } else {
+      immediate = setImmediate(checkCondition);
+    }
+  }
+
+  immediate.clear = function(){
+    console.log(immediate);
+    clearImmediate(immediate);
+  }
+
+  return immediate;
 };
 
 module.exports = exports = when;
