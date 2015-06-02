@@ -47,6 +47,40 @@ setTimeout(function(){
 
 ```
 
+## Removing the when listener
+---------------------
+
+You might feel that you no longer need to wait for something to happen. if this is the case, you can call a `.clear()` function on the return value of `when(condition, code)`.
+
+#### Example
+
+The following example is very similar to the one above, but will never print `someVar is now true, and this was only triggered when it became true!` as it is no longer waiting for `when` someVar is true!
+
+```javascript
+var when = require('when-conditional');
+var someVar = false;
+
+var interval = setInterval(function(){
+  console.log("someVar is " + someVar);
+  if(someVar === true) clearInterval(interval);
+}, 1000);
+
+var whenObj = when(function condition(){
+	return (someVar === true);
+}, function code(){
+	console.log("someVar is now true, and this was only triggered when it became true!");
+});
+
+setTimeout(function(){
+	someVar = true;
+}, 10000);
+
+setTimeout(function(){
+  whenObj.clear();
+}, 5000);
+```
+
+
 ## Inspiration
 ---------------------
 
