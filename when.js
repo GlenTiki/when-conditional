@@ -4,13 +4,11 @@ require('setimmediate');
 
 function when(condition, code){
 	if(condition()){
-	  setImmediate(code);
-	  return;
+	  return setImmediate(code);
 	} else {
-	  setImmediate(function(){
-	  	when(condition, code);
+	  return setImmediate(function(){
+	  	return when(condition, code);
 	  });
-          return;
 	}
 };
 

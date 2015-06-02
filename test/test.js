@@ -6,7 +6,7 @@ var interval = setInterval(function(){
   if(someVar === true) clearInterval(interval);
 }, 1000);
 
-when(function condition(){
+var immediate = when(function condition(){
 	return (someVar === true);
 }, function code(){
 	console.log("someVar is now true, and this was only triggered when it became true!");
@@ -15,3 +15,7 @@ when(function condition(){
 setTimeout(function(){
 	someVar = true;
 }, 10000);
+
+setTimeout(function(){
+	clearImmediate(when);
+}, 5000);
