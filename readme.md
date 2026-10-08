@@ -84,8 +84,12 @@ Version 3 requires Node.js 22.13 or later and removes the `setimmediate` polyfil
 
 ## Contributing
 
-1. Run `npm ci` to install the checkout.
+1. Run `npm ci` to install development dependencies.
 2. Run `npm test` to run the tests.
+3. Run `npm run check` to run lint, complexity, format and test checks.
+4. Run `npm run setup-hooks` to run those checks before each commit.
+
+`setup-hooks` sets this checkout's `core.hooksPath` to `.githooks`. If you already use a custom hook path, add `npm run check` to that hook instead. Installing this package does not change Git configuration.
 
 Report bugs or propose changes on [GitHub](https://github.com/GlenTiki/when-conditional).
 
