@@ -1,5 +1,3 @@
-require("setimmediate");
-
 function when(condition, code, options = {}) {
   assertFunction(condition, "condition");
   assertFunction(code, "code");

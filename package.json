@@ -1,20 +1,27 @@
 {
   "name": "when-conditional",
-  "version": "2.0.0",
-  "description": "A simple little asyncronous if check and conditional method",
+  "version": "3.0.0",
+  "description": "Poll a synchronous condition and run a callback when it becomes truthy.",
   "main": "when.js",
+  "type": "commonjs",
+  "files": [
+    "when.js"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "test": "node --test test/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thekemkid/when-conditional.git"
+    "url": "git+https://github.com/GlenTiki/when-conditional.git"
   },
   "keywords": [
     "if",
     "when",
     "async",
-    "asyncronous",
+    "polling",
     "utility",
     "condition",
     "conditional"
@@ -22,10 +29,7 @@
   "author": "Glen Keane",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/thekemkid/when-conditional/issues"
+    "url": "https://github.com/GlenTiki/when-conditional/issues"
   },
-  "homepage": "https://github.com/thekemkid/when-conditional",
-  "dependencies": {
-    "setimmediate": "^1.0.2"
-  }
+  "homepage": "https://github.com/GlenTiki/when-conditional#readme"
 }

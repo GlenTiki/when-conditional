@@ -1,149 +1,94 @@
-# When-conditional
------------------------
+# when-conditional
 
-A utility library for asyncronous conditional checking, and then running a callback when the condition is true.
+Check a synchronous condition until it becomes truthy, then call a callback once.
 
-To get started, type the following:
-
-`npm install when-conditional`
-
-## Syntax
-------------------------
-
-```
-when(logicStatement, callback)
+```sh
+npm install when-conditional
 ```
 
-#### Parameters
+Requires Node.js 22.13 or later. CI tests Node.js 22, 24 and 26. Browsers need a bundler that accepts CommonJS and a JavaScript environment that supports ES2022 and standard timers. This package does not install global polyfills.
 
-###### logicStatement
-A function which should `return` a `truthy` statement. The return is equivalent to what you would put in an `if` statement.
+## Usage
 
-###### callback
-A function which is called when the logicStatement function returns a truthy value.
+```js
+const when = require("when-conditional");
 
-#### Returns a when object with 4 functions:
-###### `whenObj.clear()`: A function to clear the when statement, if you don't want to wait for the condition to be true anymore.
-###### `whenObj.reset()`: This is for when you need reset the whenObj after it fired the code, and wait for the same condition again.
-###### `whenObj.setCondition(newCondition)`: Overwrite the `condition` function you passed in on creation.
-###### `whenObj.setCode(newCode)`: Overwrite the `code` function you passed in on creation.
+let ready = false;
+const controller = when(
+  () => ready,
+  () => console.log("Ready"),
+  { interval: 10 },
+);
 
-## Examples
-------------------------
-The example code shown below will print out someVar is false a number of times until it becomes true, then will tell you its true and exit.
-
-```javascript
-var when = require('when-conditional');
-var someVar = false;
-
-var interval = setInterval(function(){
-  console.log("someVar is " + someVar);
-  if(someVar === true) clearInterval(interval);
-}, 1000);
-
-when(function condition(){
-	return (someVar === true);
-}, function code(){
-	console.log("someVar is now true, and this was only triggered when it became true!");
-});
-
-setTimeout(function(){
-	someVar = true;
-}, 10000);
-
+setTimeout(() => {
+  ready = true;
+}, 100);
 ```
 
-### Removing the when listener
----------------------
+Native ES modules can use `import when from 'when-conditional'`.
 
-You might feel that you no longer need to wait for something to happen. if this is the case, you can call a `.clear()` function on the return value of `when(condition, code)`.
+## API
 
-The following example is very similar to the one above, but will never print `someVar is now true, and this was only triggered when it became true!` as it is no longer waiting for `when` someVar is true!
+### `when(condition, code, { interval = 10 } = {})`
 
-```javascript
-var when = require('when-conditional');
-var someVar = false;
+Both `condition` and `code` must be functions. The first condition check runs synchronously. If it returns a truthy value, `code()` runs before `when()` returns. The callback's return value is ignored.
 
-var interval = setInterval(function(){
-  console.log("someVar is " + someVar);
-  if(someVar === true) clearInterval(interval);
-}, 1000);
+When the condition is false, another check runs after the configured interval. `interval` is a positive integer in milliseconds, from `1` to `2147483647`. It defaults to `10`. Timer delays are not exact deadlines; a busy event loop can delay a check.
 
-var whenObj = when(function condition(){
-	return (someVar === true);
-}, function code(){
-	console.log("someVar is now true, and this was only triggered when it became true!");
-});
+Conditions must return synchronous values. Promise results and values with a callable `then` property raise a `TypeError`, even if they would resolve to `false`. The package consumes their rejection through `Promise.resolve()`, which also invokes a custom thenable's `then` method. It does not wait for their result.
 
-setTimeout(function(){
-	someVar = true;
-}, 10000);
+A predicate error stops that polling chain. Errors in the initial check or a synchronous `reset()` check throw to the caller. Errors during a later check throw from the timer callback. There is no asynchronous error callback.
 
-setTimeout(function(){
-  whenObj.clear();
-}, 5000);
+### `controller.clear()`
+
+Cancel future checks. Repeated calls are safe. Calling `clear()` inside the condition also discards that check's result, so it cannot invoke the callback or schedule another check.
+
+There is no timeout. Call `clear()` when you no longer need to wait. An active polling timer keeps Node.js running.
+
+### `controller.reset()`
+
+Cancel the current check cycle and check the condition again synchronously. Use this after cancellation or completion to wait again.
+
+Calling `reset()` inside the condition invalidates the old check's result. Only the new cycle can complete or schedule another check. A condition that always calls `reset()` recursively can exhaust the call stack.
+
+### `controller.setCondition(condition)`
+
+Replace the condition function. This does not run it immediately or restart a cancelled or completed controller. A non-function raises a `TypeError`.
+
+### `controller.setCode(code)`
+
+Replace the callback function. This does not restart a cancelled or completed controller. A non-function raises a `TypeError`.
+
+## Cancellation example
+
+```js
+const controller = when(
+  () => connection.isReady(),
+  () => connection.send(message),
+  { interval: 50 },
+);
+
+controller.clear();
+controller.setCondition(() => replacementConnection.isReady());
+controller.setCode(() => replacementConnection.send(message));
+controller.reset();
 ```
 
-### reseting the when listener and changing the code callback.
+Set replacement functions before `reset()`: its synchronous check can call the callback immediately.
 
-```javascript
-var when = require('when-conditional');
-var someVar = false;
+## Migration from version 2
 
-var interval = setInterval(function(){
-  console.log("someVar is " + someVar);
-  if(someVar === true) clearInterval(interval);
-}, 1000);
+Version 3 polls every 10 ms by default instead of on every event-loop turn. Pass an explicit `interval` if you need a different delay. The first check and each reset still run synchronously.
 
-var whenObj = when(function condition(){
-	return (someVar === true);
-}, function code(){
-	console.log("someVar is now true, and this was only triggered when it became true!");
-});
-
-setTimeout(function(){
-	someVar = true;
-}, 10000);
-
-setTimeout(function(){
-  whenObj.clear();
-}, 5000);
-
-setTimeout(function(){
-  whenObj.reset();
-  whenObj.setCode(function newCodeCB(){
-	  console.log("someVar is now true, and this was only triggered when it became true, AND after the when was reset AND after the code callback was changed!");
-  });
-}, 8000);
-```
+Version 3 requires Node.js 22.13 or later and removes the `setimmediate` polyfill dependency. It validates functions and interval values, and rejects Promise and thenable predicate results. Callers that relied on those results being truthy must use a synchronous condition instead.
 
 ## Contributing
---------------------
 
-If you feel there is a feature missing you would like to see, or an issue, feel free to log an issue on Github, or even better, send a PR! :D
+1. Run `npm ci` to install the checkout.
+2. Run `npm test` to run the tests.
 
-## Inspiration
----------------------
+Report bugs or propose changes on [GitHub](https://github.com/GlenTiki/when-conditional).
 
-I wanted an asyncronous if statement that only fired once the condition became true, but I couldn't extend the engine natively.
+## License
 
-The example code above should similar to something like:
-
-```javascript
-var someVar = false;
-
-when(someVar === true){
-	console.log("someVar is now true, and this was only triggered when it became true!");
-}
-
-setTimeout(function(){
-	someVar = true;
-}, 10000)
-```
-
-To get my little shim working, I check the condition every tick. this is not ideal. ideally, I want to Object.observe the conditions, and only fire the `when` check once when the conditions have been observed to change
-
-The when-method module is expected to be more efficient than an interval.
-
-## See you when-ever!
-Copyright Glen Keane - 2015 - MIT Licence
+[MIT](LICENSE), copyright 2015 Glen Keane.
