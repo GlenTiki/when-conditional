@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "A simple little asyncronous if check and conditional method",
   "main": "when.js",
+  "scripts": {
+    "test": "node --test test/*.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/thekemkid/when-conditional.git"

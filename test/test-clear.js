@@ -1,21 +1,40 @@
-var when = require('../');
-var someVar = false;
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { setImmediate } = require("node:timers/promises");
+const when = require("../");
 
-var interval = setInterval(function(){
-  console.log('someVar is ' + someVar);
-  if(someVar === true) clearInterval(interval);
-}, 1000);
+test("clear stops future checks and is safe to repeat", async (t) => {
+  let checks = 0;
+  let calls = 0;
+  const handle = when(
+    () => {
+      checks++;
+      return false;
+    },
+    () => calls++,
+  );
+  t.after(() => handle.clear());
 
-var immediate = when(function condition(){
-	return (someVar === true);
-}, function code(){
-	console.log("someVar is now true, and this was only triggered when it became true!");
+  handle.clear();
+  handle.clear();
+  await setImmediate();
+
+  assert.equal(checks, 1);
+  assert.equal(calls, 0);
 });
 
-setTimeout(function(){
-	someVar = true;
-}, 10000);
+test("setters do not restart a cancelled controller", async (t) => {
+  let calls = 0;
+  const handle = when(
+    () => false,
+    () => calls++,
+  );
+  t.after(() => handle.clear());
 
-setTimeout(function(){
-  immediate.clear();
-}, 5000);
+  handle.clear();
+  handle.setCondition(() => true);
+  handle.setCode(() => calls++);
+  await setImmediate();
+
+  assert.equal(calls, 0);
+});
