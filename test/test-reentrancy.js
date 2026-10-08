@@ -1,9 +1,10 @@
-const test = require("node:test");
+const { test, beforeEach } = require("node:test");
 const assert = require("node:assert/strict");
-const { setImmediate } = require("node:timers/promises");
 const when = require("../");
 
-test("clear inside a false predicate stops future checks", async (t) => {
+beforeEach((t) => t.mock.timers.enable({ apis: ["setTimeout"] }));
+
+test("clear inside a false predicate stops future checks", (t) => {
   let checks = 0;
   let calls = 0;
   const handle = when(
@@ -16,15 +17,15 @@ test("clear inside a false predicate stops future checks", async (t) => {
   );
   t.after(() => handle.clear());
 
-  await setImmediate();
-  await setImmediate();
-  await setImmediate();
+  t.mock.timers.tick(10);
+  t.mock.timers.tick(10);
+  t.mock.timers.tick(10);
 
   assert.equal(checks, 2);
   assert.equal(calls, 0);
 });
 
-test("clear inside a truthy predicate suppresses its callback", async (t) => {
+test("clear inside a truthy predicate suppresses its callback", (t) => {
   let checks = 0;
   let calls = 0;
   const handle = when(
@@ -40,12 +41,12 @@ test("clear inside a truthy predicate suppresses its callback", async (t) => {
   );
   t.after(() => handle.clear());
 
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(calls, 0);
 });
 
-test("reset ignores a truthy result from the previous check", async (t) => {
+test("reset ignores a truthy result from the previous check", (t) => {
   let checks = 0;
   let calls = 0;
   const handle = when(
@@ -61,16 +62,16 @@ test("reset ignores a truthy result from the previous check", async (t) => {
   );
   t.after(() => handle.clear());
 
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(checks, 3);
   assert.equal(calls, 0);
   handle.setCondition(() => true);
-  await setImmediate();
+  t.mock.timers.tick(10);
   assert.equal(calls, 1);
 });
 
-test("reset inside a false predicate leaves only one cancellable poll", async (t) => {
+test("reset inside a false predicate leaves only one cancellable poll", (t) => {
   let checks = 0;
   let calls = 0;
   const handle = when(
@@ -83,9 +84,9 @@ test("reset inside a false predicate leaves only one cancellable poll", async (t
   );
   t.after(() => handle.clear());
 
-  await setImmediate();
+  t.mock.timers.tick(10);
   handle.clear();
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(checks, 3);
   assert.equal(calls, 0);

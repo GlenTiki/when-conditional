@@ -1,7 +1,8 @@
-const test = require("node:test");
+const { test, beforeEach } = require("node:test");
 const assert = require("node:assert/strict");
-const { setImmediate } = require("node:timers/promises");
 const when = require("../");
+
+beforeEach((t) => t.mock.timers.enable({ apis: ["setTimeout"] }));
 
 test("calls the callback synchronously when the initial condition is truthy", (t) => {
   let calls = 0;
@@ -14,7 +15,7 @@ test("calls the callback synchronously when the initial condition is truthy", (t
   assert.equal(calls, 1);
 });
 
-test("checks a false condition again and calls the callback once", async (t) => {
+test("checks a false condition again and calls the callback once", (t) => {
   let ready = false;
   let calls = 0;
   const handle = when(
@@ -25,13 +26,13 @@ test("checks a false condition again and calls the callback once", async (t) => 
 
   assert.equal(calls, 0);
   ready = true;
-  await setImmediate();
+  t.mock.timers.tick(10);
   assert.equal(calls, 1);
-  await setImmediate();
+  t.mock.timers.tick(10);
   assert.equal(calls, 1);
 });
 
-test("uses replacement condition and callback while active", async (t) => {
+test("uses replacement condition and callback while active", (t) => {
   let oldCalls = 0;
   let newCalls = 0;
   const handle = when(
@@ -42,13 +43,13 @@ test("uses replacement condition and callback while active", async (t) => {
 
   handle.setCondition(() => true);
   handle.setCode(() => newCalls++);
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(oldCalls, 0);
   assert.equal(newCalls, 1);
 });
 
-test("setters do not restart a completed controller", async (t) => {
+test("setters do not restart a completed controller", (t) => {
   let calls = 0;
   const handle = when(
     () => true,
@@ -58,7 +59,7 @@ test("setters do not restart a completed controller", async (t) => {
 
   handle.setCondition(() => true);
   handle.setCode(() => calls++);
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(calls, 1);
 });

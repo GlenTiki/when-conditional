@@ -1,9 +1,10 @@
 require("setimmediate");
 
-function when(condition, code) {
+function when(condition, code, options = {}) {
   assertFunction(condition, "condition");
   assertFunction(code, "code");
-  let immediate;
+  const interval = getInterval(options);
+  let timer;
   let generation = 0;
 
   function checkCondition() {
@@ -20,13 +21,13 @@ function when(condition, code) {
       clear();
       code();
     } else {
-      immediate = setImmediate(checkCondition);
+      timer = setTimeout(checkCondition, interval);
     }
   }
 
   function clear() {
     generation++;
-    clearImmediate(immediate);
+    clearTimeout(timer);
   }
 
   function reset() {
@@ -52,6 +53,21 @@ function assertFunction(value, name) {
   if (typeof value !== "function") {
     throw new TypeError(`${name} must be a function`);
   }
+}
+
+function getInterval(options) {
+  if (
+    options === null ||
+    typeof options !== "object" ||
+    Array.isArray(options)
+  ) {
+    throw new TypeError("options must be an object");
+  }
+  const { interval = 10 } = options;
+  if (!Number.isInteger(interval) || interval < 1 || interval > 2147483647) {
+    throw new RangeError("interval must be an integer from 1 to 2147483647");
+  }
+  return interval;
 }
 
 module.exports = when;
