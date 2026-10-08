@@ -1,7 +1,8 @@
-const test = require("node:test");
+const { test, beforeEach } = require("node:test");
 const assert = require("node:assert/strict");
-const { setImmediate } = require("node:timers/promises");
 const when = require("../");
+
+beforeEach((t) => t.mock.timers.enable({ apis: ["setTimeout"] }));
 
 test("reset checks a cancelled controller synchronously", (t) => {
   let ready = false;
@@ -32,7 +33,7 @@ test("reset checks a completed controller synchronously", (t) => {
   assert.equal(calls, 2);
 });
 
-test("a callback can reset the controller after asynchronous success", async (t) => {
+test("a callback can reset the controller after asynchronous success", (t) => {
   let ready = false;
   let calls = 0;
   const handle = when(
@@ -48,11 +49,11 @@ test("a callback can reset the controller after asynchronous success", async (t)
   t.after(() => handle.clear());
 
   ready = true;
-  await setImmediate();
+  t.mock.timers.tick(10);
   assert.equal(calls, 1);
   ready = true;
-  await setImmediate();
+  t.mock.timers.tick(10);
   assert.equal(calls, 2);
-  await setImmediate();
+  t.mock.timers.tick(10);
   assert.equal(calls, 2);
 });

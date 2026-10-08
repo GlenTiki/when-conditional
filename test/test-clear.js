@@ -1,9 +1,10 @@
-const test = require("node:test");
+const { test, beforeEach } = require("node:test");
 const assert = require("node:assert/strict");
-const { setImmediate } = require("node:timers/promises");
 const when = require("../");
 
-test("clear stops future checks and is safe to repeat", async (t) => {
+beforeEach((t) => t.mock.timers.enable({ apis: ["setTimeout"] }));
+
+test("clear stops future checks and is safe to repeat", (t) => {
   let checks = 0;
   let calls = 0;
   const handle = when(
@@ -17,13 +18,13 @@ test("clear stops future checks and is safe to repeat", async (t) => {
 
   handle.clear();
   handle.clear();
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(checks, 1);
   assert.equal(calls, 0);
 });
 
-test("setters do not restart a cancelled controller", async (t) => {
+test("setters do not restart a cancelled controller", (t) => {
   let calls = 0;
   const handle = when(
     () => false,
@@ -34,7 +35,7 @@ test("setters do not restart a cancelled controller", async (t) => {
   handle.clear();
   handle.setCondition(() => true);
   handle.setCode(() => calls++);
-  await setImmediate();
+  t.mock.timers.tick(10);
 
   assert.equal(calls, 0);
 });
