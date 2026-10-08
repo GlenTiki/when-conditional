@@ -1,28 +1,58 @@
-var when = require('../');
-var someVar = false;
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { setImmediate } = require("node:timers/promises");
+const when = require("../");
 
-var interval = setInterval(function(){
-  console.log('someVar is ' + someVar);
-  if(someVar === true) clearInterval(interval);
-}, 1000);
+test("reset checks a cancelled controller synchronously", (t) => {
+  let ready = false;
+  let calls = 0;
+  const handle = when(
+    () => ready,
+    () => calls++,
+  );
+  t.after(() => handle.clear());
 
-var when = when(function condition(){
-	return (someVar === true);
-}, function code(){
-	console.log("someVar is now true, and this was only triggered when it became true!");
+  handle.clear();
+  ready = true;
+  handle.reset();
+
+  assert.equal(calls, 1);
 });
 
-setTimeout(function(){
-	someVar = true;
-}, 10000);
+test("reset checks a completed controller synchronously", (t) => {
+  let calls = 0;
+  const handle = when(
+    () => true,
+    () => calls++,
+  );
+  t.after(() => handle.clear());
 
-setTimeout(function(){
-  when.clear();
-}, 5000);
+  assert.equal(calls, 1);
+  handle.reset();
+  assert.equal(calls, 2);
+});
 
-setTimeout(function(){
-  when.reset();
-  when.setCode(function setNewCode(){
-    console.log("someVar is now true, and this was only triggered when it became true AND after it was reset AND after the 'code' CB was changed! \\0/");
-  })
-}, 8000);
+test("a callback can reset the controller after asynchronous success", async (t) => {
+  let ready = false;
+  let calls = 0;
+  const handle = when(
+    () => ready,
+    () => {
+      calls++;
+      if (calls === 1) {
+        ready = false;
+        handle.reset();
+      }
+    },
+  );
+  t.after(() => handle.clear());
+
+  ready = true;
+  await setImmediate();
+  assert.equal(calls, 1);
+  ready = true;
+  await setImmediate();
+  assert.equal(calls, 2);
+  await setImmediate();
+  assert.equal(calls, 2);
+});
